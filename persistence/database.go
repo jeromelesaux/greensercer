@@ -133,13 +133,13 @@ func GetAllDevices() (devices []*DeviceTable, err error) {
 	}
 
 	for res.Next() {
-		var uid, token string
-		var created time.Time
+		var uid, token sql.NullString
+		var created sql.NullTime
 		err = res.Scan(&uid, &token, &created)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error while getting row from sql (%v)\n", err)
 		} else {
-			devices = append(devices, DeviceTableRaw(uid, token, created))
+			devices = append(devices, DeviceTableRaw(uid.String, token.String, created.Time))
 		}
 
 	}
@@ -164,13 +164,13 @@ func GetDeviceByToken(token string) (device *DeviceTable, err error) {
 	}
 	defer res.Close()
 	for res.Next() {
-		var uid, token string
-		var created time.Time
+		var uid, token sql.NullString
+		var created sql.NullTime
 		err = res.Scan(&uid, &token, &created)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error while getting row from sql (%v)\n", err)
 		} else {
-			return DeviceTableRaw(uid, token, created), nil
+			return DeviceTableRaw(uid.String, token.String, created.Time), nil
 		}
 
 	}
@@ -193,13 +193,13 @@ func GetDeviceByUid(uid string) (device *DeviceTable, err error) {
 	}
 	defer res.Close()
 	for res.Next() {
-		var uid, token string
-		var created time.Time
+		var uid, token sql.NullString
+		var created sql.NullTime
 		err = res.Scan(&uid, &token, &created)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error while getting row from sql (%v)\n", err)
 		} else {
-			return DeviceTableRaw(uid, token, created), nil
+			return DeviceTableRaw(uid.String, token.String, created.Time), nil
 		}
 
 	}
