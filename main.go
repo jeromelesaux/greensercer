@@ -45,10 +45,10 @@ func main() {
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 
-	router.GET("/", controller.Healthy)
 	controller := &web.Controller{}
 	authorized := router.Group("/api")
 	authorized.POST("/register/:token", controller.RegisterDevice)
+	router.GET("/", controller.Healthy)
 
 	// init the apple notification
 	notification.Initialise()
