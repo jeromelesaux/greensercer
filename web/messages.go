@@ -16,6 +16,11 @@ type DeviceToken struct {
 type Controller struct {
 }
 
+func (ctr *Controller) Healthy(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	return
+}
+
 func (ctr *Controller) RegisterDevice(c *gin.Context) {
 	token := c.Param("token")
 	d, err := persistence.GetDeviceByToken(token)
