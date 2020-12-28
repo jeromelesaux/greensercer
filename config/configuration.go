@@ -20,7 +20,7 @@ type Configuration struct {
 
 var (
 	doOnce              sync.Once
-	GlobalConfiguration *Configuration
+	GlobalConfiguration = &Configuration{}
 	AppleCertificatEnv  = "APPLE_CERTIFICAT"
 	AppleKeyEnv         = "APPLE_KEY"
 	AppleEnvError       = fmt.Errorf("Apple Key or Certificat Env is not set, export content file in " + AppleCertificatEnv + " and " + AppleKeyEnv)
@@ -33,8 +33,7 @@ func LoadConfiguration(configurationFilePath string) error {
 	if appleKey == "" || appleCertificat == "" {
 		return AppleEnvError
 	}
-
-	if configurationFilePath == "" {
+	if configurationFilePath != "" {
 		fmt.Fprintf(os.Stdout, "reading configuration from file [%s]\n", configurationFilePath)
 		doOnce.Do(
 			func() {
@@ -52,7 +51,7 @@ func LoadConfiguration(configurationFilePath string) error {
 			})
 		return err
 	}
-	fmt.Fprintf(os.Stdout, "configuration file is not set http port default value (8080)")
+	fmt.Fprintf(os.Stdout, "configuration file is not set http port default value (8080)\n")
 	doOnce.Do(
 		func() {
 			GlobalConfiguration = &Configuration{
