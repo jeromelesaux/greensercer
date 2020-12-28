@@ -44,6 +44,8 @@ func main() {
 	// google oauth controller
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
+
+	router.GET("/", controller.Healthy)
 	controller := &web.Controller{}
 	authorized := router.Group("/api")
 	authorized.POST("/register/:token", controller.RegisterDevice)
