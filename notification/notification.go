@@ -22,13 +22,11 @@ func Initialise() {
 	GlobalTicker = time.NewTicker(1 * time.Hour)
 	fmt.Fprintf(os.Stdout, "Initialise ticker each one hour.")
 	go func() {
-		for {
-			select {
-			case t := <-GlobalTicker.C:
-				if err := NotifAll(t); err != nil {
-					fmt.Fprintf(os.Stderr, "Error while trying to notify devices with error :%v\n", err)
-				}
+		for t := range GlobalTicker.C {
+			if err := NotifAll(t); err != nil {
+				fmt.Fprintf(os.Stderr, "Error while trying to notify devices with error :%v\n", err)
 			}
+
 		}
 	}()
 }

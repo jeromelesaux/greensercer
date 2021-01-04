@@ -6,8 +6,10 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jeromelesaux/greenserver/notification"
 	"github.com/jeromelesaux/greenserver/persistence"
 )
 
@@ -33,6 +35,21 @@ type Controller struct {
 
 func (ctr *Controller) Healthy(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	return
+}
+
+func (ctr *Controller) ForceNotify(c *gin.Context) {
+	t := time.Now()
+	err := notification.NotifAll(t)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "All devices are notified",
+	})
 	return
 }
 
