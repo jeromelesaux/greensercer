@@ -57,10 +57,11 @@ func NotifAll(t time.Time) error {
 			n.Payload = []byte(d.Aps)
 			n.PushType = apns2.PushTypeAlert
 			n.Priority = apns2.PriorityHigh
+			n.Expiration = time.Now().Add(2 * 60)
 		}
 
 		fmt.Fprintf(os.Stdout, "Sending notification on device token [%s]\n", d.DeviceToken)
-		client := apns2.NewClient(cert).Production()
+		client := apns2.NewClient(cert).Development()
 		res, err := client.Push(n)
 		fmt.Fprintf(os.Stdout, "Response code [%d] : message body [%s]\n", res.StatusCode, res.Reason)
 		if err != nil {
