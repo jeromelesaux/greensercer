@@ -60,6 +60,8 @@ func (ctr *Controller) Notify(c *gin.Context) {
 		})
 		return
 	}
+
+	fmt.Fprintf(os.Stdout, "APS:[%s]\n", string(aps))
 	err = notification.Notify(notif.DeviceToken, aps)
 	if err != nil {
 		msg := fmt.Sprintf("Device token [%s] registered, cannot be notified error [%v].\n", notif.DeviceToken, err)
