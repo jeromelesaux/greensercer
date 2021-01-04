@@ -53,6 +53,7 @@ func createSchema() error {
 	}
 	var stmt *sql.Stmt
 	var err error
+	fmt.Fprintf(os.Stdout, "[SQL QUERY]:%s\n", schema)
 	stmt, err = dbx.Prepare(schema)
 	if err != nil {
 		return err
@@ -82,7 +83,7 @@ func InsertNewDevice(o *DeviceTable) error {
 		insertQuotes(o.Type) + "," +
 		insertQuotes(o.Aps) +
 		");"
-	fmt.Fprintf(os.Stdout, "%s\n", query)
+	fmt.Fprintf(os.Stdout, "[SQL QUERY]:%s\n", query)
 
 	insert, err := tx.Prepare(query)
 
@@ -111,7 +112,7 @@ func UpdateDevice(o *DeviceTable) error {
 	query := "update  devices set lastnotificationdate = '" +
 		time.Now().Add(time.Hour*2).Format(time.RFC3339) + "'" +
 		" where uid = '" + o.Uid + "';"
-	fmt.Fprintf(os.Stdout, "%s\n", query)
+	fmt.Fprintf(os.Stdout, "[SQL QUERY]:%s\n", query)
 
 	insert, err := tx.Prepare(query)
 
@@ -136,7 +137,7 @@ func GetAllDevices() (devices []*DeviceTable, err error) {
 	query := "select uid, devicetoken, bundleid, notificationtype, aps, lastnotificationdate from devices;"
 
 	var res *sql.Rows
-
+	fmt.Fprintf(os.Stdout, "[SQL QUERY]:%s\n", query)
 	res, err = dbx.Query(query)
 	if err != nil {
 		return devices, err
@@ -167,7 +168,7 @@ func GetDeviceByToken(token string) (device *DeviceTable, err error) {
 		";"
 
 	var res *sql.Rows
-
+	fmt.Fprintf(os.Stdout, "[SQL QUERY]:%s\n", query)
 	res, err = dbx.Query(query)
 	if err != nil {
 		return nil, err
@@ -196,7 +197,7 @@ func GetDeviceByUid(uid string) (device *DeviceTable, err error) {
 		";"
 
 	var res *sql.Rows
-
+	fmt.Fprintf(os.Stdout, "[SQL QUERY]:%s\n", query)
 	res, err = dbx.Query(query)
 	if err != nil {
 		return nil, err
