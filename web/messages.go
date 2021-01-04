@@ -47,14 +47,7 @@ func (ctr *Controller) Notify(c *gin.Context) {
 		})
 		return
 	}
-	var emptyAps = Aps{}
-	// test mandatories fields
-	if strings.ToUpper(notif.Type) == "ALERT" && notif.Aps == emptyAps {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "alert must have an aps message",
-		})
-		return
-	}
+
 	aps, err := json.Marshal(notif.Aps)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -73,7 +66,7 @@ func (ctr *Controller) Notify(c *gin.Context) {
 		return
 	}
 	msg := fmt.Sprintf("Device token [%s] has been notified.\n", notif.DeviceToken)
-	c.JSON(http.StatusInternalServerError, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"token":   notif.DeviceToken,
 		"message": msg,
 	})
