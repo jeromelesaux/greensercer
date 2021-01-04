@@ -60,7 +60,7 @@ func (ctr *Controller) Notify(c *gin.Context) {
 		})
 		return
 	}
-	amsg := fmt.Sprintf("\"aps\":{%s}", string(aps))
+	amsg := fmt.Sprintf("\"aps\":%s", string(aps))
 	fmt.Fprintf(os.Stdout, "APS:[%s]\n", amsg)
 	err = notification.Notify(notif.DeviceToken, []byte(amsg))
 	if err != nil {
@@ -132,7 +132,7 @@ func (ctr *Controller) RegisterDevice(c *gin.Context) {
 		})
 		return
 	}
-	amsg := fmt.Sprintf("\"aps\":{%s}", string(aps))
+	amsg := fmt.Sprintf("\"aps\":%s", string(aps))
 	err = notification.Notify(notif.DeviceToken, []byte(amsg))
 	if err := persistence.InsertNewDevice(persistence.NewDeviceTable(notif.DeviceToken, notif.BundleId, notif.Type, amsg)); err != nil {
 		msg := fmt.Sprintf("Error while persisting new token [%s] with error %v\n", notif.DeviceToken, err)
