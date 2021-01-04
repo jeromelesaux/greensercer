@@ -2,12 +2,15 @@ package notification
 
 import (
 	"fmt"
+	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/jeromelesaux/greenserver/config"
 	"github.com/jeromelesaux/greenserver/persistence"
-	"github.com/timehop/apns"
+	"github.com/sideshow/apns2"
+	"github.com/sideshow/apns2/certificate"
 )
 
 var (
@@ -16,20 +19,25 @@ var (
 )
 
 func Initialise() {
-	GlobalTicker = time.NewTicker(time.Hour)
+	GlobalTicker = time.NewTicker(1 * time.Hour)
+	fmt.Fprintf(os.Stdout, "Initialise ticker each one hour.")
 	go func() {
 		for {
 			select {
-			case <-done:
-				return
 			case t := <-GlobalTicker.C:
-				NotifAll(t)
+				if err := NotifAll(t); err != nil {
+					fmt.Fprintf(os.Stderr, "Error while trying to notify devices with error :%v\n", err)
+				}
 			}
 		}
 	}()
 }
 
 func NotifAll(t time.Time) error {
+	cert, err := certificate.FromP12File(config.GlobalConfiguration.AppleCertification, "")
+	if err != nil {
+		log.Fatalf("Cannot get certificate from Apple with error :%v\n", err)
+	}
 	fmt.Fprintf(os.Stdout, "Notify all apple device time :'%s'\n", t.Format("2006-01-02 15:04:05.000000"))
 	devices, err := persistence.GetAllDevices()
 	if err != nil {
@@ -37,21 +45,27 @@ func NotifAll(t time.Time) error {
 	}
 	var errorAppend string
 	for _, d := range devices {
-		c, _ := apns.NewClient(apns.ProductionGateway,
-			config.GlobalConfiguration.AppleCertification,
-			config.GlobalConfiguration.AppleKey)
+		n := &apns2.Notification{}
+		n.DeviceToken = d.DeviceToken
+		n.Topic = d.BundleId
+		n.Payload = []byte(`{
+			"aps" : {
+				"content-available" : 1
+			}
+		}`)
+		n.PushType = apns2.PushTypeBackground
+		n.Priority = apns2.PriorityLow
+		if strings.ToUpper(d.Type) == "ALERT" {
+			n.Payload = []byte(d.Aps)
+			n.PushType = apns2.PushTypeAlert
+			n.Priority = apns2.PriorityHigh
+		}
 
-		p := apns.NewPayload()
-		p.APS.Alert.Body = "Eco Data notification!"
-		p.APS.Badge.Set(5)
-		p.APS.Sound = "turn_down_for_what.aiff"
-
-		m := apns.NewNotification()
-		m.Payload = p
-		m.DeviceToken = d.DeviceToken
-		m.Priority = apns.PriorityImmediate
 		fmt.Fprintf(os.Stdout, "Sending notification on device token [%s]\n", d.DeviceToken)
-		if err := c.Send(m); err != nil {
+		client := apns2.NewClient(cert).Production()
+		res, err := client.Push(n)
+		fmt.Fprintf(os.Stdout, "Response code [%d] : message body [%s]\n", res.StatusCode, res.Reason)
+		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error while sending apple notification on device token [%s] with error %v\n", d.DeviceToken, err)
 			errorAppend += err.Error()
 		} else {

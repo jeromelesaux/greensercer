@@ -5,17 +5,28 @@ import "time"
 type DeviceTable struct {
 	Uid                  string
 	DeviceToken          string
+	BundleId             string
+	Type                 string
+	Aps                  string
 	LastNotificationDate time.Time
 }
 
-func NewDeviceTable(token string) *DeviceTable {
-	return &DeviceTable{DeviceToken: token}
+func NewDeviceTable(token, bundleid, notificationType, aps string) *DeviceTable {
+	return &DeviceTable{
+		DeviceToken: token,
+		BundleId:    bundleid,
+		Type:        notificationType,
+		Aps:         aps,
+	}
 }
 
-func DeviceTableRaw(uid string, deviceToken string, lastDate time.Time) *DeviceTable {
+func DeviceTableRaw(uid, deviceToken, bundleid, notificationType, aps string, lastDate time.Time) *DeviceTable {
 	return &DeviceTable{
 		Uid:                  uid,
 		DeviceToken:          deviceToken,
+		BundleId:             bundleid,
+		Type:                 notificationType,
+		Aps:                  aps,
 		LastNotificationDate: lastDate,
 	}
 }

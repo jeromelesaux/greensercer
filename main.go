@@ -25,6 +25,9 @@ func main() {
 		log.Fatalf("Error while loading configuration with error [%v]\n", err)
 	}
 
+	// init the apple notification
+	notification.Initialise()
+
 	/*
 	*** connect to the rds database ***
 	 */
@@ -47,11 +50,8 @@ func main() {
 
 	controller := &web.Controller{}
 	authorized := router.Group("/api")
-	authorized.POST("/register/:token", controller.RegisterDevice)
+	authorized.POST("/register/", controller.RegisterDevice)
 	router.GET("/", controller.Healthy)
-
-	// init the apple notification
-	notification.Initialise()
 
 	// start server at port 8080
 	if err := router.Run(":" + config.GlobalConfiguration.Port); err != nil {

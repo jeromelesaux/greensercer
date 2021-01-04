@@ -15,22 +15,19 @@ type Configuration struct {
 	DbEndpoint         string `json:"rdsendpoint"`
 	AwsRegion          string `json:"awsregion"`
 	AppleCertification string `json:"_"`
-	AppleKey           string `json:"_"`
 }
 
 var (
 	doOnce              sync.Once
 	GlobalConfiguration = &Configuration{}
 	AppleCertificatEnv  = "APPLE_CERTIFICAT"
-	AppleKeyEnv         = "APPLE_KEY"
-	AppleEnvError       = fmt.Errorf("Apple Key or Certificat Env is not set, export content file in " + AppleCertificatEnv + " and " + AppleKeyEnv)
+	AppleEnvError       = fmt.Errorf("Apple Certificat path file Env is not set, export path file in " + AppleCertificatEnv)
 )
 
 func LoadConfiguration(configurationFilePath string) error {
 	var err error
-	appleKey := os.Getenv(AppleCertificatEnv)
-	appleCertificat := os.Getenv(AppleKeyEnv)
-	if appleKey == "" || appleCertificat == "" {
+	appleCertificat := os.Getenv(AppleCertificatEnv)
+	if appleCertificat == "" {
 		return AppleEnvError
 	}
 	if configurationFilePath != "" {
@@ -47,7 +44,6 @@ func LoadConfiguration(configurationFilePath string) error {
 					return
 				}
 				GlobalConfiguration.AppleCertification = appleCertificat
-				GlobalConfiguration.AppleKey = appleKey
 			})
 		return err
 	}
@@ -57,7 +53,6 @@ func LoadConfiguration(configurationFilePath string) error {
 			GlobalConfiguration = &Configuration{
 				Port:               "8080",
 				AppleCertification: appleCertificat,
-				AppleKey:           appleKey,
 			}
 		})
 

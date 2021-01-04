@@ -43,6 +43,9 @@ func createSchema() error {
 	schema := "create table if not exists devices (" +
 		"uid serial primary key ," +
 		"devicetoken text, " +
+		"bundleid text," +
+		"notificationtype text," +
+		"aps text," +
 		"lastnotificationdate date);"
 
 	if err := connect(); err != nil {
@@ -60,6 +63,10 @@ func createSchema() error {
 	return err
 }
 
+func insertQuotes(v string) string {
+	return "'" + v + "'"
+}
+
 func InsertNewDevice(o *DeviceTable) error {
 	if err := connect(); err != nil {
 		return err
@@ -69,9 +76,12 @@ func InsertNewDevice(o *DeviceTable) error {
 
 	tx, err = dbx.Begin()
 
-	query := "insert into devices(devicetoken) values('" +
-		o.DeviceToken +
-		"');"
+	query := "insert into devices(devicetoken, bundleid, notificationtype, aps) values(" +
+		insertQuotes(o.DeviceToken) + "," +
+		insertQuotes(o.BundleId) + "," +
+		insertQuotes(o.Type) + "," +
+		insertQuotes(o.Aps) +
+		");"
 	fmt.Fprintf(os.Stdout, "%s\n", query)
 
 	insert, err := tx.Prepare(query)
@@ -123,7 +133,7 @@ func GetAllDevices() (devices []*DeviceTable, err error) {
 	if err := connect(); err != nil {
 		return devices, err
 	}
-	query := "select uid, devicetoken,lastnotificationdate from devices;"
+	query := "select uid, devicetoken, bundleid, notificationtype, aps, lastnotificationdate from devices;"
 
 	var res *sql.Rows
 
@@ -133,13 +143,13 @@ func GetAllDevices() (devices []*DeviceTable, err error) {
 	}
 
 	for res.Next() {
-		var uid, token sql.NullString
+		var uid, token, bundleid, notificationType, aps sql.NullString
 		var created sql.NullTime
-		err = res.Scan(&uid, &token, &created)
+		err = res.Scan(&uid, &token, &bundleid, &notificationType, &aps, &created)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error while getting row from sql (%v)\n", err)
 		} else {
-			devices = append(devices, DeviceTableRaw(uid.String, token.String, created.Time))
+			devices = append(devices, DeviceTableRaw(uid.String, token.String, bundleid.String, notificationType.String, aps.String, created.Time))
 		}
 
 	}
@@ -152,8 +162,8 @@ func GetDeviceByToken(token string) (device *DeviceTable, err error) {
 	if err := connect(); err != nil {
 		return nil, err
 	}
-	query := "select uid, devicetoken,lastnotificationdate from devices where devicetoken = " +
-		"'" + token + "'" +
+	query := "select uid, devicetoken, bundleid, notificationtype, aps, lastnotificationdate from devices where devicetoken = " +
+		insertQuotes(token) +
 		";"
 
 	var res *sql.Rows
@@ -164,13 +174,13 @@ func GetDeviceByToken(token string) (device *DeviceTable, err error) {
 	}
 	defer res.Close()
 	for res.Next() {
-		var uid, token sql.NullString
+		var uid, token, bundleid, notificationType, aps sql.NullString
 		var created sql.NullTime
-		err = res.Scan(&uid, &token, &created)
+		err = res.Scan(&uid, &token, &bundleid, &notificationType, &aps, &created)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error while getting row from sql (%v)\n", err)
 		} else {
-			return DeviceTableRaw(uid.String, token.String, created.Time), nil
+			return DeviceTableRaw(uid.String, token.String, bundleid.String, notificationType.String, aps.String, created.Time), nil
 		}
 
 	}
@@ -181,8 +191,8 @@ func GetDeviceByUid(uid string) (device *DeviceTable, err error) {
 	if err := connect(); err != nil {
 		return nil, err
 	}
-	query := "select uid, devicetoken,lastnotificationdate from devices where uid = " +
-		"'" + uid + "'" +
+	query := "uid, devicetoken, bundleid, notificationtype, aps, lastnotificationdate where uid = " +
+		insertQuotes(uid) +
 		";"
 
 	var res *sql.Rows
@@ -193,13 +203,13 @@ func GetDeviceByUid(uid string) (device *DeviceTable, err error) {
 	}
 	defer res.Close()
 	for res.Next() {
-		var uid, token sql.NullString
+		var uid, token, bundleid, notificationType, aps sql.NullString
 		var created sql.NullTime
 		err = res.Scan(&uid, &token, &created)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error while getting row from sql (%v)\n", err)
 		} else {
-			return DeviceTableRaw(uid.String, token.String, created.Time), nil
+			return DeviceTableRaw(uid.String, token.String, bundleid.String, notificationType.String, aps.String, created.Time), nil
 		}
 
 	}
