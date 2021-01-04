@@ -51,6 +51,7 @@ func main() {
 	controller := &web.Controller{}
 	authorized := router.Group("/api")
 	authorized.POST("/register/", controller.RegisterDevice)
+	authorized.POST("/notify", controller.Notify)
 	authorized.POST("/forcenotify/", controller.ForceNotify)
 	router.GET("/", controller.Healthy)
 

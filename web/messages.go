@@ -38,6 +38,48 @@ func (ctr *Controller) Healthy(c *gin.Context) {
 	return
 }
 
+func (ctr *Controller) Notify(c *gin.Context) {
+	var notif NotificationMessage
+	err := c.BindJSON(&notif)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	var emptyAps = Aps{}
+	// test mandatories fields
+	if strings.ToUpper(notif.Type) == "ALERT" && notif.Aps == emptyAps {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "alert must have an aps message",
+		})
+		return
+	}
+	aps, err := json.Marshal(notif.Aps)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"token":   notif.DeviceToken,
+			"message": "alert must have an aps message",
+		})
+		return
+	}
+	err = notification.Notify(notif.DeviceToken, aps)
+	if err != nil {
+		msg := fmt.Sprintf("Device token [%s] registered, cannot be notified error [%v].\n", notif.DeviceToken, err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"token":   notif.DeviceToken,
+			"message": msg,
+		})
+		return
+	}
+	msg := fmt.Sprintf("Device token [%s] has been notified.\n", notif.DeviceToken)
+	c.JSON(http.StatusInternalServerError, gin.H{
+		"token":   notif.DeviceToken,
+		"message": msg,
+	})
+	return
+}
+
 func (ctr *Controller) ForceNotify(c *gin.Context) {
 	t := time.Now()
 	err := notification.NotifAll(t)
