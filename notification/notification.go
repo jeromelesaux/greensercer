@@ -69,7 +69,10 @@ func NotifAll(t time.Time) error {
 		fmt.Fprintf(os.Stdout, "Sending notification on device token [%s]\n", d.DeviceToken)
 		client := apns2.NewClient(cert).Development()
 		res, err := client.Push(n)
-		fmt.Fprintf(os.Stdout, "Response code [%d] : message body [%s]\n", res.StatusCode, res.Reason)
+		if res != nil {
+			fmt.Fprintf(os.Stdout, "Response code [%d] : message body [%s]\n", res.StatusCode, res.Reason)
+		}
+
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error while sending apple notification on device token [%s] with error %v\n", d.DeviceToken, err)
 			errorAppend += err.Error()
@@ -98,7 +101,7 @@ func Notify(deviceToken string, aps []byte) error {
 		return err
 	}
 	n := &apns2.Notification{}
-	n.DeviceToken = d.DeviceToken
+	n.DeviceToken = deviceToken
 	n.Topic = d.BundleId
 	n.Payload = aps
 	n.PushType = apns2.PushTypeAlert
@@ -107,7 +110,9 @@ func Notify(deviceToken string, aps []byte) error {
 	fmt.Fprintf(os.Stdout, "Sending notification on device token [%s]\n", d.DeviceToken)
 	client := apns2.NewClient(cert).Development()
 	res, err := client.Push(n)
-	fmt.Fprintf(os.Stdout, "Response code [%d] : message body [%s]\n", res.StatusCode, res.Reason)
+	if res != nil {
+		fmt.Fprintf(os.Stdout, "Response code [%d] : message body [%s] and ApnsID [%s]\n", res.StatusCode, res.Reason, res.ApnsID)
+	}
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while sending apple notification on device token [%s] with error %v\n", d.DeviceToken, err)
 		return err
