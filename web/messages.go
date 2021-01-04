@@ -13,17 +13,21 @@ import (
 	"github.com/jeromelesaux/greenserver/persistence"
 )
 
-type Aps struct {
+type Alert struct {
 	Title    string `json:"title"`
 	Subtitle string `json:"subtitle"`
 	Body     string `json:"body"`
+}
+
+type Aps struct {
+	Alert Alert `json:"alert"`
 }
 
 type NotificationMessage struct {
 	BundleId    string `json:"bundleID"`
 	DeviceToken string `json:"deviceToken"`
 	Type        string `json:"type"`
-	Aps         Aps    `json:"alert"`
+	Aps         Aps    `json:"aps"`
 }
 
 type DeviceToken struct {
