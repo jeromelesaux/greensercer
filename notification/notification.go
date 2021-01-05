@@ -108,6 +108,16 @@ func NotifAll(t time.Time) error {
 					fmt.Fprintf(os.Stderr, "[NOTIFICATION] Error while updating date in database on device token [%s] with error %v\n", d.DeviceToken, err)
 				}
 			}
+		} else {
+			if err := PushBackgroundNotification(d); err != nil {
+				errorAppend += err.Error()
+			} else {
+				// save in database the date for this device token
+				d.LastNotificationDate = time.Now()
+				if err := persistence.UpdateDevice(d); err != nil {
+					fmt.Fprintf(os.Stderr, "[NOTIFICATION] Error while updating date in database on device token [%s] with error %v\n", d.DeviceToken, err)
+				}
+			}
 		}
 	}
 	if errorAppend != "" {
