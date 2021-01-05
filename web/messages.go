@@ -56,7 +56,7 @@ func (ctr *Controller) Notify(c *gin.Context) {
 		return
 	}
 
-	var n *Notification
+	n := &Notification{}
 	n.Aps = notif.Aps
 
 	aps, err := json.Marshal(n)
@@ -131,7 +131,7 @@ func (ctr *Controller) RegisterDevice(c *gin.Context) {
 		return
 	}
 
-	var n *Notification
+	n := &Notification{}
 	n.Aps = notif.Aps
 	aps, err := json.Marshal(n)
 	if err != nil {
