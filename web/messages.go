@@ -34,6 +34,10 @@ type DeviceToken struct {
 	DeviceToken string `json:"deviceToken"`
 }
 
+type Notification struct {
+	Aps Aps `json:"aps"`
+}
+
 type Controller struct {
 }
 
@@ -52,7 +56,10 @@ func (ctr *Controller) Notify(c *gin.Context) {
 		return
 	}
 
-	aps, err := json.Marshal(notif.Aps)
+	var n *Notification
+	n.Aps = notif.Aps
+
+	aps, err := json.Marshal(n)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"token":   notif.DeviceToken,
@@ -60,9 +67,9 @@ func (ctr *Controller) Notify(c *gin.Context) {
 		})
 		return
 	}
-	amsg := fmt.Sprintf("{\"aps\":%s}", string(aps))
-	fmt.Fprintf(os.Stdout, "APS:[%s]\n", amsg)
-	err = notification.Notify(notif.DeviceToken, []byte(amsg))
+	//amsg := fmt.Sprintf("{\"aps\":%s}", string(aps))
+	fmt.Fprintf(os.Stdout, "[APS] :[%s]\n", string(aps))
+	err = notification.Notify(notif.DeviceToken, aps)
 	if err != nil {
 		msg := fmt.Sprintf("Device token [%s] registered, cannot be notified error [%v].\n", notif.DeviceToken, err)
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -124,7 +131,9 @@ func (ctr *Controller) RegisterDevice(c *gin.Context) {
 		return
 	}
 
-	aps, err := json.Marshal(notif.Aps)
+	var n *Notification
+	n.Aps = notif.Aps
+	aps, err := json.Marshal(n)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"token":   notif.DeviceToken,
@@ -132,9 +141,11 @@ func (ctr *Controller) RegisterDevice(c *gin.Context) {
 		})
 		return
 	}
-	amsg := fmt.Sprintf("{\"aps\":%s}", string(aps))
-	err = notification.Notify(notif.DeviceToken, []byte(amsg))
-	if err := persistence.InsertNewDevice(persistence.NewDeviceTable(notif.DeviceToken, notif.BundleId, notif.Type, amsg)); err != nil {
+
+	fmt.Fprintf(os.Stdout, "[APS] :[%s]\n", string(aps))
+	//amsg := fmt.Sprintf("{\"aps\":%s}", string(aps))
+	err = notification.Notify(notif.DeviceToken, aps)
+	if err := persistence.InsertNewDevice(persistence.NewDeviceTable(notif.DeviceToken, notif.BundleId, notif.Type, string(aps))); err != nil {
 		msg := fmt.Sprintf("Error while persisting new token [%s] with error %v\n", notif.DeviceToken, err)
 		fmt.Fprintf(os.Stderr, msg)
 		c.JSON(http.StatusInternalServerError, gin.H{

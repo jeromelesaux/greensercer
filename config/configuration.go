@@ -31,7 +31,7 @@ func LoadConfiguration(configurationFilePath string) error {
 		return AppleEnvError
 	}
 	if configurationFilePath != "" {
-		fmt.Fprintf(os.Stdout, "reading configuration from file [%s]\n", configurationFilePath)
+		fmt.Fprintf(os.Stdout, "[CONFIGURATION] reading configuration from file [%s]\n", configurationFilePath)
 		doOnce.Do(
 			func() {
 				f, err := os.Open(configurationFilePath)
@@ -47,7 +47,7 @@ func LoadConfiguration(configurationFilePath string) error {
 			})
 		return err
 	}
-	fmt.Fprintf(os.Stdout, "configuration file is not set http port default value (8080)\n")
+	fmt.Fprintf(os.Stdout, "[CONFIGURATION] configuration file is not set http port default value (8080)\n")
 	doOnce.Do(
 		func() {
 			GlobalConfiguration = &Configuration{

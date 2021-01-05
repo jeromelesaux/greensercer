@@ -144,15 +144,10 @@ func GetAllDevices() (devices []*DeviceTable, err error) {
 	}
 
 	for res.Next() {
-		var uid, token, bundleid, notificationType, aps sql.NullString
-		var created sql.NullTime
-		err = res.Scan(&uid, &token, &bundleid, &notificationType, &aps, &created)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error while getting row from sql (%v)\n", err)
-		} else {
-			devices = append(devices, DeviceTableRaw(uid.String, token.String, bundleid.String, notificationType.String, aps.String, created.Time))
+		d := scanRow(res)
+		if d != nil {
+			devices = append(devices, d)
 		}
-
 	}
 	res.Close()
 
@@ -175,15 +170,10 @@ func GetDeviceByToken(token string) (device *DeviceTable, err error) {
 	}
 	defer res.Close()
 	for res.Next() {
-		var uid, token, bundleid, notificationType, aps sql.NullString
-		var created sql.NullTime
-		err = res.Scan(&uid, &token, &bundleid, &notificationType, &aps, &created)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error while getting row from sql (%v)\n", err)
-		} else {
-			return DeviceTableRaw(uid.String, token.String, bundleid.String, notificationType.String, aps.String, created.Time), nil
+		d := scanRow(res)
+		if d != nil {
+			return d, nil
 		}
-
 	}
 	return nil, fmt.Errorf("empty result")
 }
@@ -204,15 +194,21 @@ func GetDeviceByUid(uid string) (device *DeviceTable, err error) {
 	}
 	defer res.Close()
 	for res.Next() {
-		var uid, token, bundleid, notificationType, aps sql.NullString
-		var created sql.NullTime
-		err = res.Scan(&uid, &token, &created)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error while getting row from sql (%v)\n", err)
-		} else {
-			return DeviceTableRaw(uid.String, token.String, bundleid.String, notificationType.String, aps.String, created.Time), nil
+		d := scanRow(res)
+		if d != nil {
+			return d, nil
 		}
-
 	}
 	return nil, fmt.Errorf("empty result")
+}
+
+func scanRow(res *sql.Rows) *DeviceTable {
+	var uid, token, bundleid, notificationType, aps sql.NullString
+	var created sql.NullTime
+	err := res.Scan(&uid, &token, &created)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "[SQL ERROR]:error while getting row from sql (%v)\n", err)
+		return nil
+	}
+	return DeviceTableRaw(uid.String, token.String, bundleid.String, notificationType.String, aps.String, created.Time)
 }
