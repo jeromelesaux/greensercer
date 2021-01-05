@@ -205,7 +205,7 @@ func GetDeviceByUid(uid string) (device *DeviceTable, err error) {
 func scanRow(res *sql.Rows) *DeviceTable {
 	var uid, token, bundleid, notificationType, aps sql.NullString
 	var created sql.NullTime
-	err := res.Scan(&uid, &token, &created)
+	err := res.Scan(&uid, &token, &bundleid, &notificationType, &aps, &created)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "[SQL ERROR]:error while getting row from sql (%v)\n", err)
 		return nil
