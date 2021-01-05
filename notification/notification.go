@@ -60,7 +60,7 @@ func PushBackgroundNotification(d *persistence.DeviceTable) error {
 	return nil
 }
 
-func PushAlertNotification(d *persistence.DeviceTable) error {
+func PushAlertNotification(d *persistence.DeviceTable, aps []byte) error {
 	cert, err := certificate.FromP12File(config.GlobalConfiguration.AppleCertification, "")
 	if err != nil {
 		log.Fatalf("[NOTIFICATION] Cannot get certificate from Apple with error :%v\n", err)
@@ -68,14 +68,7 @@ func PushAlertNotification(d *persistence.DeviceTable) error {
 	n := &apns2.Notification{}
 	n.DeviceToken = d.DeviceToken
 	n.Topic = d.BundleId
-	n.Payload = []byte(`{
-			"aps" : {
-				"alert":{"title":
-				"Push Notification",
-				"subtitle":"Test Push Notifications",
-				"body":"Testing Push Notifications on iOS Simulator",}
-				}
-		}`)
+	n.Payload = aps
 	n.PushType = apns2.PushTypeAlert
 	n.Priority = apns2.PriorityHigh
 	n.Expiration = time.Now().Add(2 * 60)
@@ -103,7 +96,10 @@ func NotifAll(t time.Time) error {
 	var errorAppend string
 	for _, d := range devices {
 		if strings.ToUpper(d.Type) == "ALERT" {
-			if err := PushAlertNotification(d); err != nil {
+			aps := []byte(`{"aps":{
+					"alert":{"title":"Push Notification","subtitle":"Test Push Notifications","body":"Testing Push Notifications on iOS Simulator"}
+					}}`)
+			if err := PushAlertNotification(d, aps); err != nil {
 				errorAppend += err.Error()
 			} else {
 				// save in database the date for this device token
@@ -127,7 +123,7 @@ func Notify(deviceToken string, aps []byte) error {
 	if err != nil {
 		return err
 	}
-	err = PushAlertNotification(d)
+	err = PushAlertNotification(d, aps)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "[NOTIFICATION] Error while sending apple notification on device token [%s] with error %v\n", d.DeviceToken, err)
 		return err
