@@ -46,7 +46,7 @@ func PushBackgroundNotification(d *persistence.DeviceTable) error {
 	}`)
 	n.PushType = apns2.PushTypeBackground
 	n.Priority = apns2.PriorityLow
-	fmt.Fprintf(os.Stdout, "[NOTIFICATION]  Sending background notification on device token [%s] message : [%s]\n", d.DeviceToken, n.Payload.(string))
+	fmt.Fprintf(os.Stdout, "[NOTIFICATION]  Sending background notification on device token [%s] message : [%s]\n", d.DeviceToken, n.Payload)
 	client := apns2.NewClient(cert).Development()
 	res, err := client.Push(n)
 	if res != nil {
@@ -72,7 +72,7 @@ func PushAlertNotification(d *persistence.DeviceTable, aps []byte) error {
 	n.PushType = apns2.PushTypeAlert
 	n.Priority = apns2.PriorityHigh
 	n.Expiration = time.Now().Add(2 * 60)
-	fmt.Fprintf(os.Stdout, "[NOTIFICATION]  Sending Alert notification on device token [%s] message : [%s]\n", d.DeviceToken, n.Payload.(string))
+	fmt.Fprintf(os.Stdout, "[NOTIFICATION]  Sending Alert notification on device token [%s] message : [%s]\n", d.DeviceToken, n.Payload)
 	client := apns2.NewClient(cert).Development()
 	res, err := client.Push(n)
 	if res != nil {
