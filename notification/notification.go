@@ -11,6 +11,7 @@ import (
 	"github.com/jeromelesaux/greenserver/persistence"
 	"github.com/sideshow/apns2"
 	"github.com/sideshow/apns2/certificate"
+	"github.com/sideshow/apns2/payload"
 )
 
 var (
@@ -19,7 +20,9 @@ var (
 )
 
 func Initialise() {
-	GlobalTicker = time.NewTicker(1 * time.Hour)
+	interval := config.GlobalConfiguration.NotificationIntervalInMinutes
+	fmt.Fprintf(os.Stdout, "[NOTIFICATION] Set the interval time ticker to [%d] in minutes.\n", interval)
+	GlobalTicker = time.NewTicker(time.Duration(interval) * time.Minute)
 	fmt.Fprintf(os.Stdout, "[NOTIFICATION] Initialise ticker each one hour.\n")
 	go func() {
 		for t := range GlobalTicker.C {
@@ -39,11 +42,7 @@ func PushBackgroundNotification(d *persistence.DeviceTable) error {
 	n := &apns2.Notification{}
 	n.DeviceToken = d.DeviceToken
 	n.Topic = d.BundleId
-	n.Payload = []byte(`{
-		"aps" : {
-			"content-available" : 1
-		}
-	}`)
+	n.Payload = payload.NewPayload().ContentAvailable()
 	n.PushType = apns2.PushTypeBackground
 	n.Priority = apns2.PriorityLow
 	fmt.Fprintf(os.Stdout, "[NOTIFICATION]  Sending background notification on device token [%s] message : [%s]\n", d.DeviceToken, n.Payload)

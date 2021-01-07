@@ -8,13 +8,14 @@ import (
 )
 
 type Configuration struct {
-	Port               string `json:"port"`
-	DbUser             string `json:"rdsuser"`
-	DbName             string `json:"rdsname"`
-	DbPassword         string `json:"rdspassword"`
-	DbEndpoint         string `json:"rdsendpoint"`
-	AwsRegion          string `json:"awsregion"`
-	AppleCertification string `json:"_"`
+	Port                          string `json:"port"`
+	DbUser                        string `json:"rdsuser"`
+	DbName                        string `json:"rdsname"`
+	DbPassword                    string `json:"rdspassword"`
+	DbEndpoint                    string `json:"rdsendpoint"`
+	AwsRegion                     string `json:"awsregion"`
+	NotificationIntervalInMinutes int    `json:"notificationintervalinminutes"`
+	AppleCertification            string `json:"_"`
 }
 
 var (
@@ -51,8 +52,9 @@ func LoadConfiguration(configurationFilePath string) error {
 	doOnce.Do(
 		func() {
 			GlobalConfiguration = &Configuration{
-				Port:               "8080",
-				AppleCertification: appleCertificat,
+				Port:                          "8080",
+				AppleCertification:            appleCertificat,
+				NotificationIntervalInMinutes: 60,
 			}
 		})
 

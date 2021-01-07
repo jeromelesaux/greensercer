@@ -15,7 +15,7 @@ import (
 
 var (
 	configurationFlag = flag.String("config", "", "Configuration file path.")
-	version           = "1.2"
+	version           = "1.3"
 )
 
 func main() {
