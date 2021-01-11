@@ -72,6 +72,7 @@ func InsertNewDevice(o *DeviceTable) error {
 	if err := connect(); err != nil {
 		return err
 	}
+	defer dbx.Close()
 	var err error
 	var tx *sql.Tx
 
@@ -104,6 +105,7 @@ func UpdateDevice(o *DeviceTable) error {
 	if err := connect(); err != nil {
 		return err
 	}
+	defer dbx.Close()
 	var err error
 	var tx *sql.Tx
 
@@ -134,6 +136,7 @@ func GetAllDevices() (devices []*DeviceTable, err error) {
 	if err := connect(); err != nil {
 		return devices, err
 	}
+	defer dbx.Close()
 	query := "select uid, devicetoken, bundleid, notificationtype, aps, lastnotificationdate from devices;"
 
 	var res *sql.Rows
@@ -158,6 +161,7 @@ func GetDeviceByToken(token string) (device *DeviceTable, err error) {
 	if err := connect(); err != nil {
 		return nil, err
 	}
+	defer dbx.Close()
 	query := "select uid, devicetoken, bundleid, notificationtype, aps, lastnotificationdate from devices where devicetoken = " +
 		insertQuotes(token) +
 		";"
@@ -182,6 +186,7 @@ func GetDeviceByUid(uid string) (device *DeviceTable, err error) {
 	if err := connect(); err != nil {
 		return nil, err
 	}
+	defer dbx.Close()
 	query := "uid, devicetoken, bundleid, notificationtype, aps, lastnotificationdate where uid = " +
 		insertQuotes(uid) +
 		";"
